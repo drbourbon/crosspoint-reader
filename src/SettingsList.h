@@ -30,7 +30,7 @@ inline std::vector<SettingInfo> getSettingsList() {
       SettingInfo::Toggle("Sunlight Fading Fix", &CrossPointSettings::fadingFix, "fadingFix", "Display"),
 
       // --- Reader ---
-      SettingInfo::Enum("Font Family", &CrossPointSettings::fontFamily, {"Bookerly", "Noto Sans", "Open Dyslexic"},
+      SettingInfo::Enum("Font Family", &CrossPointSettings::fontFamily, {"Noto Serif", "Noto Sans", "Open Dyslexic"},
                         "fontFamily", "Reader"),
       SettingInfo::Enum("Font Size", &CrossPointSettings::fontSize, {"Small", "Medium", "Large", "X Large"}, "fontSize",
                         "Reader"),
