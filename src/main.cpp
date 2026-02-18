@@ -199,8 +199,10 @@ void waitForPowerRelease() {
 
 // Enter deep sleep mode
 void enterDeepSleep() {
-  // TRMNL Sleep Integration
-  if (TrmnlService::getConfig().enabled) {
+  // TRMNL Sleep Integration: refresh the screen only if the service is enabled
+  // and the sleep screen is set to "Custom".
+  if (TrmnlService::getConfig().enabled &&
+      SETTINGS.sleepScreen == CrossPointSettings::SLEEP_SCREEN_MODE::CUSTOM) { 
     renderer.clearScreen();
     renderer.drawCenteredText(UI_12_FONT_ID, 400, "Updating TRMNL...", true, EpdFontFamily::BOLD);
     renderer.displayBuffer();
