@@ -407,6 +407,10 @@ void EpubReaderActivity::onReaderMenuConfirm(EpubReaderMenuActivity::MenuAction 
       pendingGoHome = true;
       break;
     }
+    case EpubReaderMenuActivity::MenuAction::GO_TO_CALENDAR: {
+      onGoToCalendar();
+      break;
+    }
     case EpubReaderMenuActivity::MenuAction::DELETE_CACHE: {
       {
         RenderLock lock(*this);

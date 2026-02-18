@@ -23,6 +23,7 @@ class EpubReaderActivity final : public ActivityWithSubactivity {
   bool skipNextButtonCheck = false;     // Skip button processing for one frame after subactivity exit
   const std::function<void()> onGoBack;
   const std::function<void()> onGoHome;
+  const std::function<void()> onGoToCalendar;
 
   void renderContents(std::unique_ptr<Page> page, int orientedMarginTop, int orientedMarginRight,
                       int orientedMarginBottom, int orientedMarginLeft);
@@ -36,11 +37,13 @@ class EpubReaderActivity final : public ActivityWithSubactivity {
 
  public:
   explicit EpubReaderActivity(GfxRenderer& renderer, MappedInputManager& mappedInput, std::unique_ptr<Epub> epub,
-                              const std::function<void()>& onGoBack, const std::function<void()>& onGoHome)
+                              const std::function<void()>& onGoBack, const std::function<void()>& onGoHome,
+                              const std::function<void()>& onGoToCalendar)
       : ActivityWithSubactivity("EpubReader", renderer, mappedInput),
         epub(std::move(epub)),
         onGoBack(onGoBack),
-        onGoHome(onGoHome) {}
+        onGoHome(onGoHome),
+        onGoToCalendar(onGoToCalendar) {}
   void onEnter() override;
   void onExit() override;
   void loop() override;

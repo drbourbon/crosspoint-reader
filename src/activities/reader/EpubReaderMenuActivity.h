@@ -12,7 +12,7 @@
 class EpubReaderMenuActivity final : public ActivityWithSubactivity {
  public:
   // Menu actions available from the reader menu.
-  enum class MenuAction { SELECT_CHAPTER, GO_TO_PERCENT, ROTATE_SCREEN, GO_HOME, SYNC, DELETE_CACHE };
+  enum class MenuAction { SELECT_CHAPTER, GO_TO_PERCENT, ROTATE_SCREEN, GO_HOME, SYNC, DELETE_CACHE, GO_TO_CALENDAR };
 
   explicit EpubReaderMenuActivity(GfxRenderer& renderer, MappedInputManager& mappedInput, const std::string& title,
                                   const int currentPage, const int totalPages, const int bookProgressPercent,
@@ -36,6 +36,7 @@ class EpubReaderMenuActivity final : public ActivityWithSubactivity {
   struct MenuItem {
     MenuAction action;
     StrId labelId;
+    const char* overrideLabel;
   };
 
   // Fixed menu layout (order matters for up/down navigation).
@@ -43,6 +44,7 @@ class EpubReaderMenuActivity final : public ActivityWithSubactivity {
                                            {MenuAction::ROTATE_SCREEN, StrId::STR_ORIENTATION},
                                            {MenuAction::GO_TO_PERCENT, StrId::STR_GO_TO_PERCENT},
                                            {MenuAction::GO_HOME, StrId::STR_GO_HOME_BUTTON},
+                                           {MenuAction::GO_TO_CALENDAR, StrId::STR_GO_HOME_BUTTON, "Calendar"},
                                            {MenuAction::SYNC, StrId::STR_SYNC_PROGRESS},
                                            {MenuAction::DELETE_CACHE, StrId::STR_DELETE_CACHE}};
 

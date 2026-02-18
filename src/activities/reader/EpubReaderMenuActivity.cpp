@@ -104,7 +104,8 @@ void EpubReaderMenuActivity::render(Activity::RenderLock&&) {
       renderer.fillRect(contentX, displayY, contentWidth - 1, lineHeight, true);
     }
 
-    renderer.drawText(UI_10_FONT_ID, contentX + 20, displayY, I18N.get(menuItems[i].labelId), !isSelected);
+    const char* label = menuItems[i].overrideLabel ? menuItems[i].overrideLabel : I18N.get(menuItems[i].labelId);
+    renderer.drawText(UI_10_FONT_ID, contentX + 20, displayY, label, !isSelected);
 
     if (menuItems[i].action == MenuAction::ROTATE_SCREEN) {
       // Render current orientation value on the right edge of the content area.
