@@ -13220,4 +13220,6 @@ static const EpdFontData bookerly_18_bold = {
     40,
     -14,
     true,
+    nullptr,
+    0,
 };

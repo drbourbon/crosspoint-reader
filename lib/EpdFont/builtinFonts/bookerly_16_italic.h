@@ -7976,4 +7976,6 @@ static const EpdFontData bookerly_16_italic = {
     36,
     -12,
     true,
+    nullptr,
+    0,
 };

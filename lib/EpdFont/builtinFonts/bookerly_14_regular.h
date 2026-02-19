@@ -9337,4 +9337,6 @@ static const EpdFontData bookerly_14_regular = {
     32,
     -11,
     true,
+    nullptr,
+    0,
 };
