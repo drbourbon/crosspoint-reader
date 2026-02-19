@@ -12,6 +12,10 @@
 
 #include <cstring>
 
+#include <lualib.h>
+#include <lauxlib.h>
+#include <lua.h>
+
 #include "Battery.h"
 #include "CrossPointSettings.h"
 #include "CrossPointState.h"
@@ -340,6 +344,8 @@ void setup() {
 
   APP_STATE.loadFromFile();
   RECENT_BOOKS.loadFromFile();
+
+lua_State *L = luaL_newstate();
 
   // Boot to home screen if no book is open, last sleep was not from reader, back button is held, or reader activity
   // crashed (indicated by readerActivityLoadCount > 0)
