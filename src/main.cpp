@@ -347,7 +347,19 @@ void setup() {
   APP_STATE.loadFromFile();
   RECENT_BOOKS.loadFromFile();
 
-lua_State *L = luaL_newstate();
+  /* [FB] Test Lua library opening, script execution and Lua -> C variable passing
+  lua_State *L = luaL_newstate();
+  luaL_openlibs(L);
+  LOG_DBG("LUA", "lib opened");
+
+  if (luaL_dostring(L, "foo = 99;") == LUA_OK) {
+    lua_getglobal(L, "foo");
+    lua_Number foo_in_c = lua_tonumber(L, -1); 
+    LOG_DBG("LUA", "command executed (%i)", (int)foo_in_c);
+  }
+  lua_close(L);
+  LOG_DBG("LUA", "lib closed");
+  */
 
   // Boot to home screen if no book is open, last sleep was not from reader, back button is held, or reader activity
   // crashed (indicated by readerActivityLoadCount > 0)
