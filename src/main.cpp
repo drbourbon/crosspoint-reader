@@ -30,6 +30,7 @@
 #include "components/UITheme.h"
 #include "fontIds.h"
 #include "util/ButtonNavigator.h"
+#include "LuaPluginManager.h"
 
 HalDisplay display;
 HalGPIO gpio;
@@ -347,6 +348,9 @@ void setup() {
   APP_STATE.loadFromFile();
   RECENT_BOOKS.loadFromFile();
 
+  LuaPluginManager::getInstance().init();
+  
+  //
   /* [FB] Test Lua library opening, script execution and Lua -> C variable passing
   lua_State *L = luaL_newstate();
   luaL_openlibs(L);
