@@ -94,14 +94,33 @@ void SleepActivity::renderCustomSleepScreen() const {
         Bitmap bitmap(file, true);
         if (bitmap.parseHeaders() == BmpReaderError::Ok) {
           renderBitmapSleepScreen(bitmap);
+          file.close();
           dir.close();
           return;
         }
+        file.close();
       }
     }
   }
   if (dir) dir.close();
 
+<<<<<<< HEAD
+=======
+  // Look for sleep.bmp on the root of the sd card to determine if we should
+  // render a custom sleep screen instead of the default.
+  FsFile file;
+  if (Storage.openFileForRead("SLP", "/sleep.bmp", file)) {
+    Bitmap bitmap(file, true);
+    if (bitmap.parseHeaders() == BmpReaderError::Ok) {
+      LOG_DBG("SLP", "Loading: /sleep.bmp");
+      renderBitmapSleepScreen(bitmap);
+      file.close();
+      return;
+    }
+    file.close();
+  }
+
+>>>>>>> master
   renderDefaultSleepScreen();
 }
 
@@ -267,8 +286,10 @@ void SleepActivity::renderCoverSleepScreen() const {
     if (bitmap.parseHeaders() == BmpReaderError::Ok) {
       LOG_DBG("SLP", "Rendering sleep cover: %s", coverBmpPath.c_str());
       renderBitmapSleepScreen(bitmap);
+      file.close();
       return;
     }
+    file.close();
   }
 
   return (this->*renderNoCoverSleepScreen)();
