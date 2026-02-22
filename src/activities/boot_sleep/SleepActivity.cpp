@@ -32,6 +32,7 @@ void SleepActivity::onEnter() {
 }
 
 void SleepActivity::renderCustomSleepScreen() const {
+
   // Look for sleep.bmp on the root of the sd card to determine if we should
   // render a custom sleep screen instead of the default.
   FsFile file;
@@ -40,8 +41,10 @@ void SleepActivity::renderCustomSleepScreen() const {
     if (bitmap.parseHeaders() == BmpReaderError::Ok) {
       LOG_DBG("SLP", "Loading: /sleep.bmp");
       renderBitmapSleepScreen(bitmap);
+      file.close();
       return;
     }
+    file.close();
   }
 
   // Check if we have a /sleep directory
@@ -104,23 +107,6 @@ void SleepActivity::renderCustomSleepScreen() const {
   }
   if (dir) dir.close();
 
-<<<<<<< HEAD
-=======
-  // Look for sleep.bmp on the root of the sd card to determine if we should
-  // render a custom sleep screen instead of the default.
-  FsFile file;
-  if (Storage.openFileForRead("SLP", "/sleep.bmp", file)) {
-    Bitmap bitmap(file, true);
-    if (bitmap.parseHeaders() == BmpReaderError::Ok) {
-      LOG_DBG("SLP", "Loading: /sleep.bmp");
-      renderBitmapSleepScreen(bitmap);
-      file.close();
-      return;
-    }
-    file.close();
-  }
-
->>>>>>> master
   renderDefaultSleepScreen();
 }
 
