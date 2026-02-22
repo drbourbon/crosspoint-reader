@@ -31,6 +31,7 @@
 #include "fontIds.h"
 #include "util/ButtonNavigator.h"
 #include "LuaPluginManager.h"
+#include "util/ScreenshotUtil.h"
 
 HalDisplay display;
 HalGPIO gpio;
@@ -421,6 +422,20 @@ void loop() {
     powerManager.setPowerSaving(false);  // Restore normal CPU frequency on user activity
   }
 
+  static bool screenshotButtonsReleased = true;
+  if (gpio.isPressed(HalGPIO::BTN_POWER) && gpio.isPressed(HalGPIO::BTN_DOWN)) {
+    if (screenshotButtonsReleased) {
+      screenshotButtonsReleased = false;
+      if (currentActivity) {
+        Activity::RenderLock lock(*currentActivity);
+        ScreenshotUtil::takeScreenshot(renderer);
+      }
+    }
+    return;
+  } else {
+    screenshotButtonsReleased = true;
+  }
+
   const unsigned long sleepTimeoutMs = SETTINGS.getSleepTimeoutMs();
   if (millis() - lastActivityTime >= sleepTimeoutMs) {
     LOG_DBG("SLP", "Auto-sleep triggered after %lu ms of inactivity", sleepTimeoutMs);
@@ -430,6 +445,10 @@ void loop() {
   }
 
   if (gpio.isPressed(HalGPIO::BTN_POWER) && gpio.getHeldTime() > SETTINGS.getPowerButtonDuration()) {
+    // If the screenshot combination is potentially being pressed, don't sleep
+    if (gpio.isPressed(HalGPIO::BTN_DOWN)) {
+      return;
+    }
     enterDeepSleep();
     // This should never be hit as `enterDeepSleep` calls esp_deep_sleep_start
     return;
