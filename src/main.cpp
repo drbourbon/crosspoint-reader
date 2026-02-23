@@ -202,27 +202,7 @@ void waitForPowerRelease() {
 
 // Enter deep sleep mode
 void enterDeepSleep() {
-  // TRMNL Sleep Integration: refresh the screen only if the service is enabled
-  // and the sleep screen is set to "Custom".
-  if (TrmnlService::getConfig().enabled &&
-      SETTINGS.sleepScreen == CrossPointSettings::SLEEP_SCREEN_MODE::CUSTOM) { 
-    renderer.clearScreen();
-    renderer.drawCenteredText(UI_12_FONT_ID, 400, "Updating TRMNL...", true, EpdFontFamily::BOLD);
-    renderer.displayBuffer();
-    
-    if (WiFi.status() != WL_CONNECTED) {
-        WiFi.mode(WIFI_STA);
-        WiFi.begin();
-        int retries = 0;
-        while (WiFi.status() != WL_CONNECTED && retries < 20) {
-            delay(200);
-            retries++;
-        }
-    }
-    
-    TrmnlService::refreshScreen();
-  }
-
+  HalPowerManager::Lock powerLock;  // Ensure we are at normal CPU frequency for sleep preparation
   APP_STATE.lastSleepFromReader = currentActivity && currentActivity->isReaderActivity();
   APP_STATE.saveToFile();
   exitActivity();
