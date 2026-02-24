@@ -207,9 +207,7 @@ void enterDeepSleep() {
   // TRMNL Sleep Integration
   if (TrmnlService::getConfig().enabled &&
       SETTINGS.sleepScreen == CrossPointSettings::SLEEP_SCREEN_MODE::CUSTOM) {     
-    renderer.clearScreen();
-    renderer.drawCenteredText(UI_12_FONT_ID, 400, "Updating TRMNL...", true, EpdFontFamily::BOLD);
-    renderer.displayBuffer();
+    GUI.drawPopup(renderer, "Updating TRMNL...");
     
     if (WiFi.status() != WL_CONNECTED) {
         WiFi.mode(WIFI_STA);
