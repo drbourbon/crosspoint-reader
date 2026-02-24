@@ -17,7 +17,7 @@ for size in 12 14 16 18 ; do
   echo "processing size ${size}"
   for type in regular bold italic bolditalic ; do
     Type="$(tr '[:lower:]' '[:upper:]' <<< ${type:0:1})${type:1}"
-    echo python3 lib/EpdFont/scripts/fontconvert.py  ${TARGET_BASE}_${size}_${type} $(( size + SIZE_GAP )) "${FONT_STD}${Type}${FONT_EXT}" --2bit ">" ${TARGET}${TARGET_BASE}_${size}_${type}.h 
+    echo python3 lib/EpdFont/scripts/fontconvert.py  ${TARGET_BASE}_${size}_${type} $(( size + SIZE_GAP )) "${FONT_STD}${Type}${FONT_EXT}" --2bit --compress">" ${TARGET}${TARGET_BASE}_${size}_${type}.h 
   done
 done
 
