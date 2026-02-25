@@ -12,12 +12,15 @@ TARGET_BASE=bookerly
 #TARGET_BASE=opendyslexic
 SIZE_GAP=$1
 FONT_STD=$2
-FONT_EXT=.ttf
 for size in 12 14 16 18 ; do
   echo "echo processing size ${size}"
   for type in regular bold italic bolditalic ; do
     Type="$(tr '[:lower:]' '[:upper:]' <<< ${type:0:1})${type:1}"
-    echo python3 lib/EpdFont/scripts/fontconvert.py  ${TARGET_BASE}_${size}_${type} $(( size + SIZE_GAP )) "${FONT_STD}${Type}${FONT_EXT}" --2bit --compress">" ${TARGET}${TARGET_BASE}_${size}_${type}.h 
+    FileName=${FONT_STD}${Type}.ttf
+    if ! test -f ${FileName}; then
+      FileName=${FONT_STD}${Type}.otf
+    fi
+    echo python3 lib/EpdFont/scripts/fontconvert.py  ${TARGET_BASE}_${size}_${type} $(( size + SIZE_GAP )) "${FileName}" --2bit --compress">" ${TARGET}${TARGET_BASE}_${size}_${type}.h 
   done
 done
 
