@@ -11,7 +11,7 @@ extern const char* const STRINGS_EN[];
 extern const char* const STRINGS_ES[];
 extern const char* const STRINGS_FR[];
 extern const char* const STRINGS_DE[];
-extern const char* const STRINGS_CZ[];
+extern const char* const STRINGS_CS[];
 extern const char* const STRINGS_PO[];
 extern const char* const STRINGS_RU[];
 extern const char* const STRINGS_SV[];
@@ -20,5 +20,7 @@ extern const char* const STRINGS_CA[];
 extern const char* const STRINGS_UK[];
 extern const char* const STRINGS_BE[];
 extern const char* const STRINGS_IT[];
+extern const char* const STRINGS_PL[];
+extern const char* const STRINGS_FI[];
 
 }  // namespace i18n_strings
