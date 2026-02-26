@@ -26,8 +26,8 @@
 #include "activities/home/RecentBooksActivity.h"
 #include "activities/network/CrossPointWebServerActivity.h"
 #include "activities/reader/ReaderActivity.h"
-#include "activities/trmnl/TrmnlSetupActivity.h"
 #include "trmnl/TrmnlService.h"
+#include "activities/settings/TrmnlSettingsActivity.h"
 #include "activities/settings/SettingsActivity.h"
 #include "activities/util/FullScreenMessageActivity.h"
 #include "components/UITheme.h"
@@ -273,15 +273,10 @@ void onGoToBrowser() {
   enterNewActivity(new OpdsBookBrowserActivity(renderer, mappedInputManager, onGoHome));
 }
 
-void onGoToTrmnl() {
-  exitActivity();
-  enterNewActivity(new TrmnlSetupActivity(renderer, mappedInputManager, onGoHome));
-}
-
 void onGoHome() {
   exitActivity();
   enterNewActivity(new HomeActivity(renderer, mappedInputManager, onGoToReader, onGoToMyLibrary, onGoToRecentBooks,
-                                    onGoToSettings, onGoToFileTransfer, onGoToBrowser, onGoToTrmnl));
+                                    onGoToSettings, onGoToFileTransfer, onGoToBrowser));
 }
 
 void setupDisplayAndFonts() {

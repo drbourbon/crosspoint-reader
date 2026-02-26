@@ -13,6 +13,7 @@ class TrmnlService {
   };
 
   static void loadConfig();
+  static void setConfig(const Config config);
   static void saveConfig();
   static Config& getConfig();
 

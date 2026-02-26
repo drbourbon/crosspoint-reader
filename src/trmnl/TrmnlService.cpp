@@ -11,6 +11,7 @@ const char* TrmnlService::CONFIG_PATH = "/.crosspoint/trmnl.json";
 
 void TrmnlService::loadConfig() {
   if (configLoaded) return;
+  LOG_DBG("TRMNL_SVC", "loadConfig: loading from %s", CONFIG_PATH);
 
   if (Storage.exists(CONFIG_PATH)) {
     FsFile file;
@@ -21,14 +22,23 @@ void TrmnlService::loadConfig() {
         config.enabled = doc["enabled"] | false;
         if (doc["serverUrl"].is<const char*>()) config.serverUrl = doc["serverUrl"].as<std::string>();
         if (doc["apiKey"].is<const char*>()) config.apiKey = doc["apiKey"].as<std::string>();
+        LOG_DBG("TRMNL_SVC", "loadConfig: values loaded (url:%s, api:%s)", config.serverUrl.c_str(), config.apiKey.c_str());
+      } else {
+        LOG_ERR("TRMNL_SVC", "loadConfig: json parse error: %s", error.c_str());
       }
       file.close();
+    } else {
+      LOG_ERR("TRMNL_SVC", "loadConfig: failed to open file for reading");
     }
+  } else {
+    LOG_DBG("TRMNL_SVC", "loadConfig: file does not exist, using defaults");
   }
   configLoaded = true;
 }
 
 void TrmnlService::saveConfig() {
+  LOG_DBG("TRMNL_SVC", "saveConfig: saving to %s (enabled:%d, url:%s, api:%s)", 
+    CONFIG_PATH, config.enabled, config.serverUrl.c_str(), config.apiKey.c_str());
   FsFile file;
   if (Storage.openFileForWrite("TRMNL", CONFIG_PATH, file)) {
     JsonDocument doc;
@@ -37,11 +47,21 @@ void TrmnlService::saveConfig() {
     doc["apiKey"] = config.apiKey;
     serializeJson(doc, file);
     file.close();
+    LOG_DBG("TRMNL_SVC", "saveConfig: done");
+  } else {
+    LOG_ERR("TRMNL_SVC", "saveConfig: failed to open file for writing");
   }
 }
 
+void TrmnlService::setConfig(const Config config) {
+  LOG_DBG("TRMNL_SVC", "setConfig called");
+  TrmnlService::config = config;
+}
+
 TrmnlService::Config& TrmnlService::getConfig() {
+  LOG_DBG("TRMNL_SVC", "getConfig called");
   loadConfig();
+  LOG_DBG("TRMNL_SVC", "getConfig returning config object");
   return config;
 }
 
@@ -79,7 +99,7 @@ bool TrmnlService::registerDevice() {
           saveConfig();
       }
   } else {
-      LOG_ERR("TRMNL", "Register failed: %d", httpCode);
+      LOG_ERR("TRMNL_SVC", "Register failed: %d", httpCode);
   }
   
   http.end();
@@ -118,7 +138,7 @@ bool TrmnlService::refreshScreen() {
           imageUrl = doc["image_url"].as<String>();
       }
   } else {
-      LOG_ERR("TRMNL", "Display info failed: %d", httpCode);
+      LOG_ERR("TRMNL_SVC", "Display info failed: %d", httpCode);
   }
   http.end();
 
@@ -155,7 +175,7 @@ bool TrmnlService::refreshScreen() {
         return true;
     }
   } else {
-      LOG_ERR("TRMNL", "Download failed: %d", httpCode);
+      LOG_ERR("TRMNL_SVC", "Download failed: %d", httpCode);
   }
   http.end();
   return false;
