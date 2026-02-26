@@ -118,13 +118,15 @@ bool TrmnlService::refreshScreen() {
   // 1. Get display status (JSON)
   std::string url = baseUrl + "/api/display"; 
   
+  LOG_DBG("TRMNL_SVC", "Calling BYOS server");
+
   http.begin(url.c_str());
   http.addHeader("id", getMacAddress().c_str());
   if (!config.apiKey.empty()) {
       http.addHeader("access-token", config.apiKey.c_str());
   }
   http.addHeader("rssi", String(WiFi.RSSI()));
-  http.addHeader("fw-version", "1.0.0"); // Report version for format negotiation
+  http.addHeader("fw-version", "1.7.7"); // Report version for format negotiation
 
   http.setTimeout(10000);
   int httpCode = http.GET();
@@ -145,6 +147,8 @@ bool TrmnlService::refreshScreen() {
   if (imageUrl.isEmpty()) return false;
 
   // 2. Download the image
+  LOG_DBG("TRMNL_SVC", "Downloading image from %s", imageUrl.c_str());
+
   http.begin(imageUrl);
   http.setTimeout(30000);
   httpCode = http.GET();
