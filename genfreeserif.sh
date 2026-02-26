@@ -12,7 +12,7 @@ TARGET_BASE=bookerly
 #TARGET_BASE=opendyslexic
 SIZE_GAP=$1
 FONT_STD=$2
-FONT_EXT=.otf
+FONT_EXT=.ttf
 for size in 12 14 16 18 ; do
   echo "processing size ${size}"
   for type in regular bold italic bolditalic ; do
