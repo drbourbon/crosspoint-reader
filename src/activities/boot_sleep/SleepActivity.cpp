@@ -13,9 +13,15 @@
 #include "fontIds.h"
 #include "images/Logo120.h"
 #include "util/StringUtils.h"
+#include "trmnl/TrmnlService.h"
 
 void SleepActivity::onEnter() {
   Activity::onEnter();
+
+  if (TrmnlService::getConfig().enabled) {
+    return renderTrmnlSleepScreen();
+  }
+
   GUI.drawPopup(renderer, tr(STR_ENTERING_SLEEP));
 
   switch (SETTINGS.sleepScreen) {
@@ -31,22 +37,21 @@ void SleepActivity::onEnter() {
   }
 }
 
-void SleepActivity::renderCustomSleepScreen() const {
-
-  // Look for sleep.bmp on the root of the sd card to determine if we should
-  // render a custom sleep screen instead of the default.
+void SleepActivity::renderTrmnlSleepScreen() const {
   FsFile file;
-  if (Storage.openFileForRead("SLP", "/sleep.bmp", file)) {
+  if (Storage.openFileForRead("SLP", "/.crosspoint/trmnl.bmp", file)) {
     Bitmap bitmap(file, true);
     if (bitmap.parseHeaders() == BmpReaderError::Ok) {
-      LOG_DBG("SLP", "Loading: /sleep.bmp");
+      LOG_DBG("SLP", "Loading:/.crosspoint/trmnl.bmp");
       renderBitmapSleepScreen(bitmap);
       file.close();
       return;
     }
     file.close();
   }
+}
 
+void SleepActivity::renderCustomSleepScreen() const {
   // Check if we have a /sleep directory
   auto dir = Storage.open("/sleep");
   if (dir && dir.isDirectory()) {
@@ -106,6 +111,20 @@ void SleepActivity::renderCustomSleepScreen() const {
     }
   }
   if (dir) dir.close();
+
+  // Look for sleep.bmp on the root of the sd card to determine if we should
+  // render a custom sleep screen instead of the default.
+  FsFile file;
+  if (Storage.openFileForRead("SLP", "/sleep.bmp", file)) {
+    Bitmap bitmap(file, true);
+    if (bitmap.parseHeaders() == BmpReaderError::Ok) {
+      LOG_DBG("SLP", "Loading: /sleep.bmp");
+      renderBitmapSleepScreen(bitmap);
+      file.close();
+      return;
+    }
+    file.close();
+  }
 
   renderDefaultSleepScreen();
 }

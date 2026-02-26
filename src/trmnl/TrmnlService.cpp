@@ -154,7 +154,7 @@ bool TrmnlService::refreshScreen() {
     
     FsFile file;
     // Note: We overwrite sleep.bmp. Ensure Settings -> Sleep Screen is set to "Custom" to use it.
-    if (Storage.openFileForWrite("TRMNL", "/sleep.bmp", file)) {
+    if (Storage.openFileForWrite("TRMNL", "/.crosspoint/trmnl.bmp", file)) {
         uint8_t buff[512];
         int remaining = len;
         unsigned long lastDataTime = millis();

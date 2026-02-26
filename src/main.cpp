@@ -205,8 +205,7 @@ void enterDeepSleep() {
   HalPowerManager::Lock powerLock;  // Ensure we are at normal CPU frequency for sleep preparation
 
   // TRMNL Sleep Integration
-  if (TrmnlService::getConfig().enabled &&
-      SETTINGS.sleepScreen == CrossPointSettings::SLEEP_SCREEN_MODE::CUSTOM) {     
+  if (TrmnlService::getConfig().enabled) {     
     GUI.drawPopup(renderer, "Updating TRMNL...");
     
     if (WiFi.status() != WL_CONNECTED) {
