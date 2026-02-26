@@ -41,11 +41,14 @@ void SleepActivity::renderTrmnlSleepScreen() const {
   FsFile file;
   if (Storage.openFileForRead("SLP", "/.crosspoint/trmnl.bmp", file)) {
     Bitmap bitmap(file, true);
-    if (bitmap.parseHeaders() == BmpReaderError::Ok) {
+    const BmpReaderError parseVal = bitmap.parseHeaders();
+    if (parseVal == BmpReaderError::Ok) {
       LOG_DBG("SLP", "Loading:/.crosspoint/trmnl.bmp");
       renderBitmapSleepScreen(bitmap);
       file.close();
       return;
+    } else {
+      LOG_ERR("SLP", "Error loading:/.crosspoint/trmnl.bmp (%s)", Bitmap::errorToString(parseVal));
     }
     file.close();
   }
@@ -148,14 +151,28 @@ void SleepActivity::renderDefaultSleepScreen() const {
 
 void SleepActivity::renderBitmapSleepScreen(const Bitmap& bitmap) const {
   int x, y;
-  const auto pageWidth = renderer.getScreenWidth();
-  const auto pageHeight = renderer.getScreenHeight();
+  auto pageWidth = renderer.getScreenWidth();
+  auto pageHeight = renderer.getScreenHeight();
   float cropX = 0, cropY = 0;
 
-  LOG_DBG("SLP", "bitmap %d x %d, screen %d x %d", bitmap.getWidth(), bitmap.getHeight(), pageWidth, pageHeight);
-  if (bitmap.getWidth() > pageWidth || bitmap.getHeight() > pageHeight) {
+  const int bmpWidth = bitmap.getWidth();
+  const int bmpHeight = bitmap.getHeight();
+  const bool rotated = bmpWidth > bmpHeight;
+
+  if (rotated) {
+    LOG_DBG("SLP", "Found landscape image %d x %d", bmpWidth, bmpHeight);
+    // The bitmap is landscape, but the screen is portrait. We want to render it rotated.
+    // We change the orientation to landscape so the logical screen matches the physical panel.
+    renderer.setOrientation(GfxRenderer::Orientation::LandscapeClockwise);
+    // After rotation, screen dimensions are swapped for the renderer
+    pageWidth = renderer.getScreenWidth();
+    pageHeight = renderer.getScreenHeight();
+  }
+
+  LOG_DBG("SLP", "bitmap %d x %d, screen %d x %d", bmpWidth, bmpHeight, pageWidth, pageHeight);
+  if (bmpWidth > pageWidth || bmpHeight > pageHeight) {
     // image will scale, make sure placement is right
-    float ratio = static_cast<float>(bitmap.getWidth()) / static_cast<float>(bitmap.getHeight());
+    float ratio = static_cast<float>(bmpWidth) / static_cast<float>(bmpHeight);
     const float screenRatio = static_cast<float>(pageWidth) / static_cast<float>(pageHeight);
 
     LOG_DBG("SLP", "bitmap ratio: %f, screen ratio: %f", ratio, screenRatio);
@@ -164,7 +181,7 @@ void SleepActivity::renderBitmapSleepScreen(const Bitmap& bitmap) const {
       if (SETTINGS.sleepScreenCoverMode == CrossPointSettings::SLEEP_SCREEN_COVER_MODE::CROP) {
         cropX = 1.0f - (screenRatio / ratio);
         LOG_DBG("SLP", "Cropping bitmap x: %f", cropX);
-        ratio = (1.0f - cropX) * static_cast<float>(bitmap.getWidth()) / static_cast<float>(bitmap.getHeight());
+        ratio = (1.0f - cropX) * static_cast<float>(bmpWidth) / static_cast<float>(bmpHeight);
       }
       x = 0;
       y = std::round((static_cast<float>(pageHeight) - static_cast<float>(pageWidth) / ratio) / 2);
@@ -174,7 +191,7 @@ void SleepActivity::renderBitmapSleepScreen(const Bitmap& bitmap) const {
       if (SETTINGS.sleepScreenCoverMode == CrossPointSettings::SLEEP_SCREEN_COVER_MODE::CROP) {
         cropY = 1.0f - (ratio / screenRatio);
         LOG_DBG("SLP", "Cropping bitmap y: %f", cropY);
-        ratio = static_cast<float>(bitmap.getWidth()) / ((1.0f - cropY) * static_cast<float>(bitmap.getHeight()));
+        ratio = static_cast<float>(bmpWidth) / ((1.0f - cropY) * static_cast<float>(bmpHeight));
       }
       x = std::round((static_cast<float>(pageWidth) - static_cast<float>(pageHeight) * ratio) / 2);
       y = 0;
@@ -182,8 +199,8 @@ void SleepActivity::renderBitmapSleepScreen(const Bitmap& bitmap) const {
     }
   } else {
     // center the image
-    x = (pageWidth - bitmap.getWidth()) / 2;
-    y = (pageHeight - bitmap.getHeight()) / 2;
+    x = (pageWidth - bmpWidth) / 2;
+    y = (pageHeight - bmpHeight) / 2;
   }
 
   LOG_DBG("SLP", "drawing to %d x %d", x, y);
@@ -215,6 +232,11 @@ void SleepActivity::renderBitmapSleepScreen(const Bitmap& bitmap) const {
 
     renderer.displayGrayBuffer();
     renderer.setRenderMode(GfxRenderer::BW);
+  }
+
+  if (rotated) {
+    // Restore original orientation
+    renderer.setOrientation(GfxRenderer::Orientation::Portrait);
   }
 }
 
