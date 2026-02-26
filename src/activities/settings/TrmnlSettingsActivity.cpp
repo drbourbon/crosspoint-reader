@@ -17,7 +17,6 @@ const StrId menuNames[MENU_ITEMS] = {StrId::STR_TRMNL_ENABLED, StrId::STR_TRMNL_
 }  // namespace
 
 void TrmnlSettingsActivity::onEnter() {
-  LOG_DBG("TRMNL", "onEnter");
   ActivityWithSubactivity::onEnter();
 
   LOG_DBG("TRMNL", "getting config");
@@ -32,7 +31,6 @@ void TrmnlSettingsActivity::onEnter() {
 
   selectedIndex = 0;
   requestUpdate();
-  LOG_DBG("TRMNL", "onEnter done");
 }
 
 void TrmnlSettingsActivity::onExit() { ActivityWithSubactivity::onExit(); }
