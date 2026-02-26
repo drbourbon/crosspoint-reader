@@ -13,9 +13,15 @@
 #include "fontIds.h"
 #include "images/Logo120.h"
 #include "util/StringUtils.h"
+#include "trmnl/TrmnlService.h"
 
 void SleepActivity::onEnter() {
   Activity::onEnter();
+
+  if (TrmnlService::getConfig().enabled) {
+    return renderTrmnlSleepScreen();
+  }
+
   GUI.drawPopup(renderer, tr(STR_ENTERING_SLEEP));
 
   switch (SETTINGS.sleepScreen) {
@@ -28,6 +34,20 @@ void SleepActivity::onEnter() {
       return renderCoverSleepScreen();
     default:
       return renderDefaultSleepScreen();
+  }
+}
+
+void SleepActivity::renderTrmnlSleepScreen() const {
+  FsFile file;
+  if (Storage.openFileForRead("SLP", "/.crosspoint/trmnl.bmp", file)) {
+    Bitmap bitmap(file, true);
+    if (bitmap.parseHeaders() == BmpReaderError::Ok) {
+      LOG_DBG("SLP", "Loading:/.crosspoint/trmnl.bmp");
+      renderBitmapSleepScreen(bitmap);
+      file.close();
+      return;
+    }
+    file.close();
   }
 }
 
