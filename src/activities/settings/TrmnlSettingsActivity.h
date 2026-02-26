@@ -26,6 +26,7 @@ class TrmnlSettingsActivity final : public ActivityWithSubactivity {
   size_t selectedIndex = 0;
   const std::function<void()> onBack;
   TrmnlService::Config config;
+  std::string cachedMacAddress;
 
   void handleSelection();
 };

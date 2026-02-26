@@ -3,6 +3,7 @@
 #include <GfxRenderer.h>
 #include <I18n.h>
 #include <Logging.h>
+#include <WiFi.h>
 
 #include "MappedInputManager.h"
 #include "activities/util/KeyboardEntryActivity.h"
@@ -21,6 +22,13 @@ void TrmnlSettingsActivity::onEnter() {
 
   LOG_DBG("TRMNL", "getting config");
   config = TrmnlService::getConfig();
+
+  uint8_t mac[6];
+  WiFi.macAddress(mac);
+  char macStr[64];
+  snprintf(macStr, sizeof(macStr), "%s %02x-%02x-%02x-%02x-%02x-%02x", tr(STR_MAC_ADDRESS), mac[0], mac[1], mac[2],
+           mac[3], mac[4], mac[5]);
+  cachedMacAddress = std::string(macStr);
 
   selectedIndex = 0;
   requestUpdate();
@@ -97,7 +105,10 @@ void TrmnlSettingsActivity::render(Activity::RenderLock&&) {
 
   GUI.drawHeader(renderer, Rect{0, metrics.topPadding, pageWidth, metrics.headerHeight}, tr(STR_TRMNL_SETTINGS));
 
-  const int contentTop = metrics.topPadding + metrics.headerHeight + metrics.verticalSpacing;
+  GUI.drawSubHeader(renderer, Rect{0, metrics.topPadding + metrics.headerHeight, pageWidth, metrics.tabBarHeight},
+                    cachedMacAddress.c_str());
+
+  const int contentTop = metrics.topPadding + metrics.headerHeight + metrics.tabBarHeight + metrics.verticalSpacing;
   const int contentHeight = pageHeight - contentTop - metrics.buttonHintsHeight - metrics.verticalSpacing * 2;
 
   GUI.drawList(
