@@ -6,6 +6,7 @@
 #include <I18n.h>
 #include <Txt.h>
 #include <Xtc.h>
+#include <WiFi.h>
 
 #include "CrossPointSettings.h"
 #include "CrossPointState.h"
@@ -24,6 +25,10 @@ void SleepActivity::onEnter() {
 
   GUI.drawPopup(renderer, tr(STR_ENTERING_SLEEP));
 
+  return selectedMode();
+}
+
+void SleepActivity::selectedMode() const {
   switch (SETTINGS.sleepScreen) {
     case (CrossPointSettings::SLEEP_SCREEN_MODE::BLANK):
       return renderBlankSleepScreen();
@@ -49,6 +54,7 @@ void SleepActivity::renderTrmnlSleepScreen() const {
       return;
     } else {
       LOG_ERR("SLP", "Error loading:/.crosspoint/trmnl.bmp (%s)", Bitmap::errorToString(parseVal));
+      selectedMode();
     }
     file.close();
   }

@@ -4,10 +4,16 @@
 #include <HalStorage.h>
 #include <WiFi.h>
 #include <Logging.h>
+#include <HalPowerManager.h>
 
 TrmnlService::Config TrmnlService::config;
 bool TrmnlService::configLoaded = false;
 const char* TrmnlService::CONFIG_PATH = "/.crosspoint/trmnl.json";
+
+bool TrmnlService::isEnabled() {
+  if (!configLoaded) loadConfig();
+  return config.enabled && config.apiKey.length() > 0;
+}
 
 void TrmnlService::loadConfig() {
   if (configLoaded) return;
@@ -120,6 +126,9 @@ bool TrmnlService::refreshScreen() {
   
   LOG_DBG("TRMNL_SVC", "Calling BYOS server");
 
+  float batteryVoltage = (4.2f * powerManager.getBatteryPercentage())/100.0f;
+  LOG_DBG("TRMNL_SVC", "Battery voltage: %f", batteryVoltage);
+
   http.begin(url.c_str());
   http.addHeader("id", getMacAddress().c_str());
   if (!config.apiKey.empty()) {
@@ -127,6 +136,8 @@ bool TrmnlService::refreshScreen() {
   }
   http.addHeader("rssi", String(WiFi.RSSI()));
   http.addHeader("fw-version", "1.7.7"); // Report version for format negotiation
+  http.addHeader("Battery-Voltage", String(batteryVoltage));
+  
 
   http.setTimeout(10000);
   int httpCode = http.GET();
@@ -157,7 +168,6 @@ bool TrmnlService::refreshScreen() {
     WiFiClient* stream = http.getStreamPtr();
     
     FsFile file;
-    // Note: We overwrite sleep.bmp. Ensure Settings -> Sleep Screen is set to "Custom" to use it.
     if (Storage.openFileForWrite("TRMNL", "/.crosspoint/trmnl.bmp", file)) {
         uint8_t buff[512];
         int remaining = len;

@@ -16,6 +16,7 @@ class TrmnlService {
   static void setConfig(const Config config);
   static void saveConfig();
   static Config& getConfig();
+  static bool isEnabled();
 
   // Register device with the BYOS server
   static bool registerDevice();
