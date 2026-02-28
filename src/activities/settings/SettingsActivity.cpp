@@ -178,7 +178,7 @@ void SettingsActivity::toggleCurrentSetting() {
         startActivityForResult(std::make_unique<CalibreSettingsActivity>(renderer, mappedInput), resultHandler);
         break;
       case SettingAction::Trmnl:
-        enterSubActivity(new TrmnlSettingsActivity(renderer, mappedInput, onComplete));
+        startActivityForResult(std::make_unique<TrmnlSettingsActivity>(renderer, mappedInput), resultHandler);
         break;
       case SettingAction::Network:
         startActivityForResult(std::make_unique<WifiSelectionActivity>(renderer, mappedInput, false), resultHandler);

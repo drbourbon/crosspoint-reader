@@ -10,6 +10,7 @@
 #include <Logging.h>
 #include <SPI.h>
 #include <builtinFonts/all.h>
+#include <WiFi.h>
 
 #include <cstring>
 
@@ -24,6 +25,7 @@
 #include "fontIds.h"
 #include "util/ButtonNavigator.h"
 #include "util/ScreenshotUtil.h"
+#include "trmnl/TrmnlService.h"
 
 HalDisplay display;
 HalGPIO gpio;
@@ -201,9 +203,9 @@ void enterDeepSleep() {
     }
   }
 
-  APP_STATE.lastSleepFromReader = currentActivity && currentActivity->isReaderActivity();
+  APP_STATE.lastSleepFromReader = activityManager.isReaderActivity();
   APP_STATE.saveToFile();
-
+  
   activityManager.goToSleep();
 
   display.deepSleep();

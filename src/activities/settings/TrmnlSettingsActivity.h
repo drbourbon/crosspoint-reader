@@ -2,23 +2,22 @@
 
 #include <functional>
 
-#include "activities/ActivityWithSubactivity.h"
+#include "activities/Activity.h"
 #include "util/ButtonNavigator.h"
 #include "trmnl/TrmnlService.h"
 
 /**
  * Submenu for TRMNL Service settings.
  */
-class TrmnlSettingsActivity final : public ActivityWithSubactivity {
+class TrmnlSettingsActivity final : public Activity {
  public:
-  explicit TrmnlSettingsActivity(GfxRenderer& renderer, MappedInputManager& mappedInput,
-                                 const std::function<void()>& onBack)
-      : ActivityWithSubactivity("TrmnlSettings", renderer, mappedInput), onBack(onBack) {}
+  explicit TrmnlSettingsActivity(GfxRenderer& renderer, MappedInputManager& mappedInput)
+      : Activity("TrmnlSettings", renderer, mappedInput) {}
 
   void onEnter() override;
   void onExit() override;
   void loop() override;
-  void render(Activity::RenderLock&&) override;
+  void render(RenderLock&&) override;
 
  private:
   ButtonNavigator buttonNavigator;

@@ -17,7 +17,7 @@ const StrId menuNames[MENU_ITEMS] = {StrId::STR_TRMNL_ENABLED, StrId::STR_TRMNL_
 }  // namespace
 
 void TrmnlSettingsActivity::onEnter() {
-  ActivityWithSubactivity::onEnter();
+  Activity::onEnter();
 
   LOG_DBG("TRMNL", "getting config");
   config = TrmnlService::getConfig();
@@ -33,16 +33,11 @@ void TrmnlSettingsActivity::onEnter() {
   requestUpdate();
 }
 
-void TrmnlSettingsActivity::onExit() { ActivityWithSubactivity::onExit(); }
+void TrmnlSettingsActivity::onExit() { Activity::onExit(); }
 
 void TrmnlSettingsActivity::loop() {
-  if (subActivity) {
-    subActivity->loop();
-    return;
-  }
-
   if (mappedInput.wasPressed(MappedInputManager::Button::Back)) {
-    onBack();
+    activityManager.popActivity();
     return;
   }
 
@@ -74,26 +69,23 @@ void TrmnlSettingsActivity::handleSelection() {
     requestUpdate();
   } else if (selectedIndex == 1) {
     // Server URL
-    exitActivity();
-    enterNewActivity(new KeyboardEntryActivity(
-        renderer, mappedInput, tr(STR_TRMNL_SERVER_URL), config.serverUrl,
-        255,    // maxLength
-        false,  // not password
-        [this](const std::string& url) {
-          config.serverUrl = url;
-          TrmnlService::setConfig(config);
-          TrmnlService::saveConfig();
-          exitActivity();
-          requestUpdate();
-        },
-        [this]() {
-          exitActivity();
-          requestUpdate();
-        }));
+    startActivityForResult(std::make_unique<KeyboardEntryActivity>(renderer, mappedInput, tr(STR_TRMNL_SERVER_URL),
+                                                                   config.serverUrl,
+                                                                   100,      // maxLength
+                                                                   false),  // not password
+                           [this](const ActivityResult& result) {
+                             if (!result.isCancelled) {
+                               const auto& kb = std::get<KeyboardResult>(result.data);
+                                config.serverUrl = kb.text;
+                                TrmnlService::setConfig(config);
+                                TrmnlService::saveConfig();
+                             }
+                           });
+
   }
 }
 
-void TrmnlSettingsActivity::render(Activity::RenderLock&&) {
+void TrmnlSettingsActivity::render(RenderLock&&) {
   LOG_DBG("TRMNL", "render start");
   renderer.clearScreen();
 

@@ -12,6 +12,8 @@
 #include "reader/ReaderActivity.h"
 #include "settings/SettingsActivity.h"
 #include "util/FullScreenMessageActivity.h"
+#include "trmnl/TrmnlService.h"
+#include "activities/settings/TrmnlSettingsActivity.h"
 
 void ActivityManager::begin() {
   xTaskCreate(&renderTaskTrampoline, "ActivityManagerRender",
