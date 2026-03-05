@@ -190,6 +190,7 @@ bool TrmnlService::refreshScreen() {
     }
   } else {
       LOG_ERR("TRMNL_SVC", "Download failed: %d", httpCode);
+      Storage.remove("/.crosspoint/trmnl.bmp");
   }
   http.end();
   return false;
