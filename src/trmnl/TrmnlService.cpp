@@ -26,8 +26,10 @@ void TrmnlService::loadConfig() {
       DeserializationError error = deserializeJson(doc, file);
       if (!error) {
         config.enabled = doc["enabled"] | false;
+        config.customServer = doc["customServer"] | false;
         if (doc["serverUrl"].is<const char*>()) config.serverUrl = doc["serverUrl"].as<std::string>();
         if (doc["apiKey"].is<const char*>()) config.apiKey = doc["apiKey"].as<std::string>();
+        if (doc["friendlyId"].is<const char*>()) config.friendlyId = doc["friendlyId"].as<std::string>();
         LOG_DBG("TRMNL_SVC", "loadConfig: values loaded (url:%s, api:%s)", config.serverUrl.c_str(), config.apiKey.c_str());
       } else {
         LOG_ERR("TRMNL_SVC", "loadConfig: json parse error: %s", error.c_str());
@@ -49,8 +51,10 @@ void TrmnlService::saveConfig() {
   if (Storage.openFileForWrite("TRMNL", CONFIG_PATH, file)) {
     JsonDocument doc;
     doc["enabled"] = config.enabled;
+    doc["customServer"] = config.customServer;
     doc["serverUrl"] = config.serverUrl;
     doc["apiKey"] = config.apiKey;
+    doc["friendlyId"] = config.friendlyId;
     serializeJson(doc, file);
     file.close();
     LOG_DBG("TRMNL_SVC", "saveConfig: done");
@@ -83,7 +87,7 @@ bool TrmnlService::registerDevice() {
   if (WiFi.status() != WL_CONNECTED) return false;
 
   HTTPClient http;
-  std::string baseUrl = config.serverUrl;
+  std::string baseUrl = config.customServer ? config.serverUrl : "https://trmnl.app";
   if (!baseUrl.empty() && baseUrl.back() == '/') baseUrl.pop_back();
   
   // Use GET /api/setup with headers as per BYOS implementation
@@ -102,6 +106,7 @@ bool TrmnlService::registerDevice() {
       deserializeJson(respDoc, response);
       if (respDoc["api_key"].is<const char*>()) {
           config.apiKey = respDoc["api_key"].as<std::string>();
+          config.friendlyId = respDoc["friendly_id"].as<std::string>();
           saveConfig();
       }
   } else {
@@ -118,13 +123,13 @@ bool TrmnlService::refreshScreen() {
   if (WiFi.status() != WL_CONNECTED) return false;
 
   HTTPClient http;
-  std::string baseUrl = config.serverUrl;
+  std::string baseUrl = config.customServer ? config.serverUrl : "https://trmnl.app";
   if (!baseUrl.empty() && baseUrl.back() == '/') baseUrl.pop_back();
   
   // 1. Get display status (JSON)
   std::string url = baseUrl + "/api/display"; 
   
-  LOG_DBG("TRMNL_SVC", "Calling BYOS server");
+  LOG_DBG("TRMNL_SVC", "Calling BYOS server (%s)", url.c_str());
 
   float batteryVoltage = (4.2f * powerManager.getBatteryPercentage())/100.0f;
   LOG_DBG("TRMNL_SVC", "Battery voltage: %f", batteryVoltage);
@@ -149,13 +154,19 @@ bool TrmnlService::refreshScreen() {
       DeserializationError error = deserializeJson(doc, response);
       if (!error && doc["image_url"].is<const char*>()) {
           imageUrl = doc["image_url"].as<String>();
+          LOG_DBG("TRMNL_SVC", "Got image url: %s", imageUrl.c_str());
+      } else {
+        LOG_ERR("TRMNL_SVC", "Error response (%s)", response.c_str());
       }
   } else {
       LOG_ERR("TRMNL_SVC", "Display info failed: %d", httpCode);
   }
   http.end();
 
-  if (imageUrl.isEmpty()) return false;
+  if (imageUrl.isEmpty()) {
+    Storage.remove("/.crosspoint/trmnl.bmp");
+    return false;
+  }
 
   // 2. Download the image
   LOG_DBG("TRMNL_SVC", "Downloading image from %s", imageUrl.c_str());

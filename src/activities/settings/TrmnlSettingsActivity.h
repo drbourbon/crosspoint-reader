@@ -26,6 +26,7 @@ class TrmnlSettingsActivity final : public Activity {
   const std::function<void()> onBack;
   TrmnlService::Config config;
   std::string cachedMacAddress;
+  std::string cachedFriendlyId;
 
   void handleSelection();
 };
