@@ -28,6 +28,7 @@ void TrmnlService::loadConfig() {
         config.enabled = doc["enabled"] | false;
         if (doc["serverUrl"].is<const char*>()) config.serverUrl = doc["serverUrl"].as<std::string>();
         if (doc["apiKey"].is<const char*>()) config.apiKey = doc["apiKey"].as<std::string>();
+        if (doc["friendlyId"].is<const char*>()) config.friendlyId = doc["friendlyId"].as<std::string>();
         LOG_DBG("TRMNL_SVC", "loadConfig: values loaded (url:%s, api:%s)", config.serverUrl.c_str(), config.apiKey.c_str());
       } else {
         LOG_ERR("TRMNL_SVC", "loadConfig: json parse error: %s", error.c_str());
@@ -51,6 +52,7 @@ void TrmnlService::saveConfig() {
     doc["enabled"] = config.enabled;
     doc["serverUrl"] = config.serverUrl;
     doc["apiKey"] = config.apiKey;
+    doc["apiKey"] = config.friendlyId;
     serializeJson(doc, file);
     file.close();
     LOG_DBG("TRMNL_SVC", "saveConfig: done");
@@ -102,6 +104,7 @@ bool TrmnlService::registerDevice() {
       deserializeJson(respDoc, response);
       if (respDoc["api_key"].is<const char*>()) {
           config.apiKey = respDoc["api_key"].as<std::string>();
+          config.friendlyId = respDoc["friendly_id"].as<std::string>();
           saveConfig();
       }
   } else {

@@ -10,6 +10,7 @@ class TrmnlService {
     bool enabled = false;
     std::string serverUrl = "http://192.168.1.100:8080"; // Default BYOS URL
     std::string apiKey = "";
+    std::string friendlyId = "";
   };
 
   static void loadConfig();
