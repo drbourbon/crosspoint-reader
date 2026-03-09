@@ -11,9 +11,9 @@
 #include "fontIds.h"
 
 namespace {
-constexpr int MENU_ITEMS = 2;
+constexpr int MENU_ITEMS = 3;
 // Nota: si presume che questi ID di stringa vengano aggiunti a I18nKeys.h
-const StrId menuNames[MENU_ITEMS] = {StrId::STR_TRMNL_ENABLED, StrId::STR_TRMNL_SERVER_URL};
+const StrId menuNames[MENU_ITEMS] = {StrId::STR_TRMNL_ENABLED, StrId::STR_TRMNL_CUSTOM_SERVER, StrId::STR_TRMNL_SERVER_URL};
 }  // namespace
 
 void TrmnlSettingsActivity::onEnter() {
@@ -28,6 +28,11 @@ void TrmnlSettingsActivity::onEnter() {
   snprintf(macStr, sizeof(macStr), "%s %02x-%02x-%02x-%02x-%02x-%02x", tr(STR_MAC_ADDRESS), mac[0], mac[1], mac[2],
            mac[3], mac[4], mac[5]);
   cachedMacAddress = std::string(macStr);
+
+  char friendlyIdStr[128];
+  snprintf(friendlyIdStr, sizeof(friendlyIdStr), "%s: %s", tr(STR_TRMNL_FRIENDLY_ID),
+           config.friendlyId.empty() ? "-" : config.friendlyId.c_str());
+  cachedFriendlyId = std::string(friendlyIdStr);
 
   selectedIndex = 0;
   requestUpdate();
@@ -68,7 +73,14 @@ void TrmnlSettingsActivity::handleSelection() {
     TrmnlService::saveConfig();
     requestUpdate();
   } else if (selectedIndex == 1) {
+    // Toggle custom server
+    config.customServer = !config.customServer;
+    TrmnlService::setConfig(config);
+    TrmnlService::saveConfig();
+    requestUpdate();
+  } else if (selectedIndex == 2) {
     // Server URL
+    if (!config.customServer) return;
     startActivityForResult(std::make_unique<KeyboardEntryActivity>(renderer, mappedInput, tr(STR_TRMNL_SERVER_URL),
                                                                    config.serverUrl,
                                                                    100,      // maxLength
@@ -95,10 +107,13 @@ void TrmnlSettingsActivity::render(RenderLock&&) {
 
   GUI.drawHeader(renderer, Rect{0, metrics.topPadding, pageWidth, metrics.headerHeight}, tr(STR_TRMNL_SETTINGS));
 
-  GUI.drawSubHeader(renderer, Rect{0, metrics.topPadding + metrics.headerHeight, pageWidth, metrics.tabBarHeight},
-                    cachedMacAddress.c_str());
+  int currentY = metrics.topPadding + metrics.headerHeight;
+  GUI.drawSubHeader(renderer, Rect{0, currentY, pageWidth, metrics.tabBarHeight}, cachedMacAddress.c_str());
+  currentY += metrics.tabBarHeight;
+  GUI.drawSubHeader(renderer, Rect{0, currentY, pageWidth, metrics.tabBarHeight}, cachedFriendlyId.c_str());
+  currentY += metrics.tabBarHeight;
 
-  const int contentTop = metrics.topPadding + metrics.headerHeight + metrics.tabBarHeight + metrics.verticalSpacing;
+  const int contentTop = currentY + metrics.verticalSpacing;
   const int contentHeight = pageHeight - contentTop - metrics.buttonHintsHeight - metrics.verticalSpacing * 2;
 
   GUI.drawList(
@@ -110,6 +125,9 @@ void TrmnlSettingsActivity::render(RenderLock&&) {
         if (index == 0) {
           return config.enabled ? std::string(tr(STR_STATE_ON)) : std::string(tr(STR_STATE_OFF));
         } else if (index == 1) {
+          return config.customServer ? std::string(tr(STR_STATE_ON)) : std::string(tr(STR_STATE_OFF));
+        } else if (index == 2) {
+          if (!config.customServer) return std::string("Default (trmnl.app)");
           return config.serverUrl.empty() ? std::string(tr(STR_NOT_SET)) : config.serverUrl;
         }
         return std::string("");

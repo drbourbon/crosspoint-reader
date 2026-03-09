@@ -58,6 +58,9 @@ void SleepActivity::renderTrmnlSleepScreen() const {
       selectedMode();
     }
     file.close();
+  } else {
+    LOG_ERR("SLP", "TRMNL image doesn't exist. Reverting to selected sleep mode");
+    selectedMode();
   }
 }
 
