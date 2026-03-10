@@ -7,13 +7,15 @@
 
 #include "MappedInputManager.h"
 #include "activities/util/KeyboardEntryActivity.h"
+#include "activities/settings/TrmnlRegisterActivity.h"
 #include "components/UITheme.h"
 #include "fontIds.h"
 
 namespace {
-constexpr int MENU_ITEMS = 3;
+constexpr int MENU_ITEMS = 4;
 // Nota: si presume che questi ID di stringa vengano aggiunti a I18nKeys.h
-const StrId menuNames[MENU_ITEMS] = {StrId::STR_TRMNL_ENABLED, StrId::STR_TRMNL_CUSTOM_SERVER, StrId::STR_TRMNL_SERVER_URL};
+const StrId menuNames[MENU_ITEMS] = {StrId::STR_TRMNL_ENABLED, StrId::STR_TRMNL_CUSTOM_SERVER,
+                                     StrId::STR_TRMNL_SERVER_URL, StrId::STR_TRMNL_REGISTER_DEVICE};
 }  // namespace
 
 void TrmnlSettingsActivity::onEnter() {
@@ -42,7 +44,7 @@ void TrmnlSettingsActivity::onExit() { Activity::onExit(); }
 
 void TrmnlSettingsActivity::loop() {
   if (mappedInput.wasPressed(MappedInputManager::Button::Back)) {
-    activityManager.popActivity();
+    finish();
     return;
   }
 
@@ -93,7 +95,12 @@ void TrmnlSettingsActivity::handleSelection() {
                                 TrmnlService::saveConfig();
                              }
                            });
-
+  } else if (selectedIndex == 3) {
+    // Register device
+    startActivityForResult(std::make_unique<TrmnlRegisterActivity>(renderer, mappedInput), [this](const ActivityResult&) {
+      // Reload config and redraw to show new friendly ID
+      onEnter();
+    });
   }
 }
 
@@ -129,6 +136,8 @@ void TrmnlSettingsActivity::render(RenderLock&&) {
         } else if (index == 2) {
           if (!config.customServer) return std::string("Default (trmnl.app)");
           return config.serverUrl.empty() ? std::string(tr(STR_NOT_SET)) : config.serverUrl;
+        } else if (index == 3) {
+          return config.friendlyId.empty() ? std::string(tr(STR_NOT_REGISTERED)) : std::string(tr(STR_REGISTERED));
         }
         return std::string("");
       },
