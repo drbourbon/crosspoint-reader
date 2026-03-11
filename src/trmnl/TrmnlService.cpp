@@ -109,6 +109,7 @@ bool TrmnlService::registerDevice() {
       }
   } else {
       LOG_ERR("TRMNL_SVC", "Register failed: %d", httpCode);
+      return false;
   }
   
   http.end();
