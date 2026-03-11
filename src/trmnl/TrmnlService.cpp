@@ -77,8 +77,6 @@ TrmnlService::Config& TrmnlService::getConfig() {
 
 std::string TrmnlService::getMacAddress() {
   String mac = WiFi.macAddress();
-  mac.replace(":", "");
-  mac.toLowerCase();
   return std::string(mac.c_str());
 }
 
@@ -111,6 +109,7 @@ bool TrmnlService::registerDevice() {
       }
   } else {
       LOG_ERR("TRMNL_SVC", "Register failed: %d", httpCode);
+      return false;
   }
   
   http.end();
