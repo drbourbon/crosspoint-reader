@@ -136,8 +136,6 @@ void TrmnlSettingsActivity::render(RenderLock&&) {
         } else if (index == 2) {
           if (!config.customServer) return std::string("Default (trmnl.app)");
           return config.serverUrl.empty() ? std::string(tr(STR_NOT_SET)) : config.serverUrl;
-        } else if (index == 3) {
-          return config.friendlyId.empty() ? std::string(tr(STR_NOT_REGISTERED)) : std::string(tr(STR_REGISTERED));
         }
         return std::string("");
       },
