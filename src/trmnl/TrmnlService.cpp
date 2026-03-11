@@ -80,7 +80,7 @@ std::string TrmnlService::getMacAddress() {
   return std::string(mac.c_str());
 }
 
-bool TrmnlService::registerDevice() {
+bool TrmnlService::registerDevice(std::string& message) {
   loadConfig();
   if (WiFi.status() != WL_CONNECTED) return false;
 
@@ -97,11 +97,12 @@ bool TrmnlService::registerDevice() {
   
   int httpCode = http.GET();
   bool success = (httpCode == 200);
-  
+  String response = http.getString();
+  JsonDocument respDoc;
+  deserializeJson(respDoc, response);
+  message = respDoc["message"].as<std::string>();
+
   if (success) {
-      String response = http.getString();
-      JsonDocument respDoc;
-      deserializeJson(respDoc, response);
       if (respDoc["api_key"].is<const char*>()) {
           config.apiKey = respDoc["api_key"].as<std::string>();
           config.friendlyId = respDoc["friendly_id"].as<std::string>();
