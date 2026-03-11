@@ -77,8 +77,6 @@ TrmnlService::Config& TrmnlService::getConfig() {
 
 std::string TrmnlService::getMacAddress() {
   String mac = WiFi.macAddress();
-  mac.replace(":", "");
-  mac.toLowerCase();
   return std::string(mac.c_str());
 }
 
