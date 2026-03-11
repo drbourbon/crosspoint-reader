@@ -21,7 +21,7 @@ class TrmnlService {
   static bool isEnabled();
 
   // Register device with the BYOS server
-  static bool registerDevice();
+  static bool registerDevice(std::string& message);
 
   // Download the screen image to /sleep.bmp
   static bool refreshScreen();
