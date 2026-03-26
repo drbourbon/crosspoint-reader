@@ -12,6 +12,7 @@
 #include <Logging.h>
 #include <SPI.h>
 #include <builtinFonts/all.h>
+#include <WiFi.h>
 
 #include <cstring>
 
@@ -26,6 +27,7 @@
 #include "fontIds.h"
 #include "util/ButtonNavigator.h"
 #include "util/ScreenshotUtil.h"
+#include "trmnl/TrmnlService.h"
 
 HalDisplay display;
 HalGPIO gpio;
@@ -42,7 +44,6 @@ EpdFont bookerly14ItalicFont(&bookerly_14_italic);
 EpdFont bookerly14BoldItalicFont(&bookerly_14_bolditalic);
 EpdFontFamily bookerly14FontFamily(&bookerly14RegularFont, &bookerly14BoldFont, &bookerly14ItalicFont,
                                    &bookerly14BoldItalicFont);
-#ifndef OMIT_FONTS
 EpdFont bookerly12RegularFont(&bookerly_12_regular);
 EpdFont bookerly12BoldFont(&bookerly_12_bold);
 EpdFont bookerly12ItalicFont(&bookerly_12_italic);
@@ -62,6 +63,7 @@ EpdFont bookerly18BoldItalicFont(&bookerly_18_bolditalic);
 EpdFontFamily bookerly18FontFamily(&bookerly18RegularFont, &bookerly18BoldFont, &bookerly18ItalicFont,
                                    &bookerly18BoldItalicFont);
 
+#ifndef OMIT_FONTS
 EpdFont notosans12RegularFont(&notosans_12_regular);
 EpdFont notosans12BoldFont(&notosans_12_bold);
 EpdFont notosans12ItalicFont(&notosans_12_italic);
@@ -183,9 +185,30 @@ void waitForPowerRelease() {
 // Enter deep sleep mode
 void enterDeepSleep() {
   HalPowerManager::Lock powerLock;  // Ensure we are at normal CPU frequency for sleep preparation
+
+  // TRMNL Sleep Integration
+  if (TrmnlService::isEnabled()) {
+    
+    if (WiFi.status() != WL_CONNECTED) {
+        GUI.drawPopup(renderer, "Enabling WiFi...");
+        WiFi.mode(WIFI_STA);
+        WiFi.begin();
+        int retries = 0;
+        while (WiFi.status() != WL_CONNECTED && retries < 30) {
+            delay(200);
+            retries++;
+        }
+    }
+    
+    if (WiFi.status() == WL_CONNECTED) {
+      GUI.drawPopup(renderer, "Updating TRMNL...");
+      TrmnlService::refreshScreen();
+    }
+  }
+
   APP_STATE.lastSleepFromReader = activityManager.isReaderActivity();
   APP_STATE.saveToFile();
-
+  
   activityManager.goToSleep();
 
   display.deepSleep();
@@ -208,11 +231,11 @@ void setupDisplayAndFonts() {
   fontCacheManager.setFontDecompressor(&fontDecompressor);
   renderer.setFontCacheManager(&fontCacheManager);
   renderer.insertFont(BOOKERLY_14_FONT_ID, bookerly14FontFamily);
-#ifndef OMIT_FONTS
   renderer.insertFont(BOOKERLY_12_FONT_ID, bookerly12FontFamily);
   renderer.insertFont(BOOKERLY_16_FONT_ID, bookerly16FontFamily);
   renderer.insertFont(BOOKERLY_18_FONT_ID, bookerly18FontFamily);
 
+#ifndef OMIT_FONTS
   renderer.insertFont(NOTOSANS_12_FONT_ID, notosans12FontFamily);
   renderer.insertFont(NOTOSANS_14_FONT_ID, notosans14FontFamily);
   renderer.insertFont(NOTOSANS_16_FONT_ID, notosans16FontFamily);

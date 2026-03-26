@@ -1,0 +1,36 @@
+#pragma once
+
+#include <Arduino.h>
+#include <ArduinoJson.h>
+#include <string>
+
+class TrmnlService {
+ public:
+  struct Config {
+    bool enabled = false;
+    bool customServer = false;
+    std::string serverUrl = "http://192.168.1.100:8080"; // Default BYOS URL
+    std::string apiKey = "";
+    std::string friendlyId = "";
+  };
+
+  static void loadConfig();
+  static void setConfig(const Config config);
+  static void saveConfig();
+  static Config& getConfig();
+  static bool isEnabled();
+
+  // Register device with the BYOS server
+  static bool registerDevice(std::string& message);
+
+  // Download the screen image to /sleep.bmp
+  static bool refreshScreen();
+
+  // Helper to get MAC address formatted for TRMNL (no colons, lowercase/uppercase as needed)
+  static std::string getMacAddress();
+
+ private:
+  static Config config;
+  static bool configLoaded;
+  static const char* CONFIG_PATH;
+};
