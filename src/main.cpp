@@ -184,24 +184,7 @@ void enterDeepSleep() {
   HalPowerManager::Lock powerLock;  // Ensure we are at normal CPU frequency for sleep preparation
 
   // TRMNL Sleep Integration
-  if (TrmnlService::isEnabled()) {
-    
-    if (WiFi.status() != WL_CONNECTED) {
-        GUI.drawPopup(renderer, "Enabling WiFi...");
-        WiFi.mode(WIFI_STA);
-        WiFi.begin();
-        int retries = 0;
-        while (WiFi.status() != WL_CONNECTED && retries < 30) {
-            delay(200);
-            retries++;
-        }
-    }
-    
-    if (WiFi.status() == WL_CONNECTED) {
-      GUI.drawPopup(renderer, "Updating TRMNL...");
-      TrmnlService::refreshScreen();
-    }
-  }
+  TrmnlService::fetchBeforeSleep(renderer);
 
   APP_STATE.lastSleepFromReader = activityManager.isReaderActivity();
   APP_STATE.saveToFile();
