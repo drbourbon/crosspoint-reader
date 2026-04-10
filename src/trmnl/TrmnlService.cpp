@@ -139,7 +139,6 @@ void TrmnlService::fetchBeforeSleep(GfxRenderer renderer) {
     LOG_DBG("TRMNL_SVC", "Wifi connected. Fetching TRMNL screen");
     GUI.drawPopup(renderer, "Updating TRMNL...");
     refreshScreen();
-    WiFi.persistent(false);
     WiFi.mode(WIFI_OFF);
   } else {
     WiFi.mode(WIFI_OFF);
