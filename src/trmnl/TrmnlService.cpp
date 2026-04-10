@@ -5,6 +5,7 @@
 #include <WiFi.h>
 #include <Logging.h>
 #include <HalPowerManager.h>
+#include "components/UITheme.h"
 
 TrmnlService::Config TrmnlService::config;
 bool TrmnlService::configLoaded = false;
@@ -115,6 +116,36 @@ bool TrmnlService::registerDevice(std::string& message) {
   
   http.end();
   return success;
+}
+
+void TrmnlService::fetchBeforeSleep(GfxRenderer renderer) {
+  if (!isEnabled()) return;
+
+  LOG_DBG("TRMNL_SVC", "Connecting to WiFi to fetch TRMNL screen");
+  
+  if (WiFi.status() != WL_CONNECTED) {
+      GUI.drawPopup(renderer, "Enabling WiFi...");
+      WiFi.persistent(true);
+      delay(100);
+      WiFi.begin();
+      int retries = 0;
+      while (WiFi.status() != WL_CONNECTED && retries < 30) {
+          delay(100);
+          retries++;
+      }
+  }
+  
+  if (WiFi.status() == WL_CONNECTED) {
+    LOG_DBG("TRMNL_SVC", "Wifi connected. Fetching TRMNL screen");
+    GUI.drawPopup(renderer, "Updating TRMNL...");
+    refreshScreen();
+    WiFi.persistent(false);
+    WiFi.mode(WIFI_OFF);
+  } else {
+    WiFi.mode(WIFI_OFF);
+    Storage.remove("/.crosspoint/trmnl.bmp");
+    LOG_ERR("TRMNL_SVC", "Can't connect to Wifi to Fetch TRMNL screen");
+  }
 }
 
 bool TrmnlService::refreshScreen() {

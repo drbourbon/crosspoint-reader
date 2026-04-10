@@ -3,6 +3,7 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
 #include <string>
+#include <GfxRenderer.h>
 
 class TrmnlService {
  public:
@@ -25,6 +26,8 @@ class TrmnlService {
 
   // Download the screen image to /sleep.bmp
   static bool refreshScreen();
+
+  static void fetchBeforeSleep(GfxRenderer renderer);
 
   // Helper to get MAC address formatted for TRMNL (no colons, lowercase/uppercase as needed)
   static std::string getMacAddress();
