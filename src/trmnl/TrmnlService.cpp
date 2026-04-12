@@ -130,7 +130,7 @@ void TrmnlService::fetchBeforeSleep(GfxRenderer renderer) {
       WiFi.begin();
       int retries = 0;
       while (WiFi.status() != WL_CONNECTED && retries < 30) {
-          delay(100);
+          delay(200);
           retries++;
       }
   }
@@ -201,19 +201,21 @@ bool TrmnlService::refreshScreen() {
   // 2. Download the image
   LOG_DBG("TRMNL_SVC", "Downloading image from %s", imageUrl.c_str());
 
-  http.begin(imageUrl);
-  http.setTimeout(30000);
-  httpCode = http.GET();
+  HTTPClient http2;
+
+  http2.begin(imageUrl);
+  http2.setTimeout(30000);
+  httpCode = http2.GET();
   if (httpCode == HTTP_CODE_OK) {
-    int len = http.getSize();
-    WiFiClient* stream = http.getStreamPtr();
+    int len = http2.getSize();
+    WiFiClient* stream = http2.getStreamPtr();
     
     FsFile file;
     if (Storage.openFileForWrite("TRMNL", "/.crosspoint/trmnl.bmp", file)) {
         uint8_t buff[512];
         int remaining = len;
         unsigned long lastDataTime = millis();
-        while (http.connected() && (len > 0 || len == -1)) {
+        while (http2.connected() && (len > 0 || len == -1)) {
             size_t size = stream->available();
             if (size) {
                 int c = stream->readBytes(buff, ((size > sizeof(buff)) ? sizeof(buff) : size));
@@ -226,13 +228,13 @@ bool TrmnlService::refreshScreen() {
             delay(1);
         }
         file.close();
-        http.end();
+        http2.end();
         return true;
     }
   } else {
       LOG_ERR("TRMNL_SVC", "Download failed: %d", httpCode);
       Storage.remove("/.crosspoint/trmnl.bmp");
   }
-  http.end();
+  http2.end();
   return false;
 }
