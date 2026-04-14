@@ -2,7 +2,7 @@ name: CI (build)
 
 on:
   push:
-    branches: [master]
+    branches: [lora, sleep-as-trmnl-v3]
   pull_request:
 
 permissions:
