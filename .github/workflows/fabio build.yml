@@ -30,7 +30,7 @@ jobs:
 
       - name: Add Local Build Options
         run: |
-          echo -e "[base]\nlocal_build_flags=\n\t-OMIT_FONTS=1" > platformio.local.ini
+          echo -e "[base]\nlocal_build_flags=\n\t-DOMIT_FONTS=1" > platformio.local.ini
           cat platformio.local.ini
 
       - name: Build CrossPoint
