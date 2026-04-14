@@ -30,7 +30,7 @@ jobs:
 
       - name: Add Local Build Options
         id: vars
-        run: echo "[base]\nlocal_build_flags=\n\t-OMIT_FONTS=1" >> $GITHUB_OUTPUT
+        run: echo "[base]\nlocal_build_flags=\n\t-OMIT_FONTS=1" > platformio.local.ini
 
       - name: Build CrossPoint
         run: |
