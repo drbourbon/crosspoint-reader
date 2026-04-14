@@ -1,4 +1,4 @@
-name: CI (build)
+name: Fabio Build
 
 on:
   pull_request:
