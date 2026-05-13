@@ -83,18 +83,21 @@ void TrmnlSettingsActivity::handleSelection() {
   } else if (selectedIndex == 2) {
     // Server URL
     if (!config.customServer) return;
+
+    auto handler = [this](const ActivityResult& result) {
+      if (!result.isCancelled) {
+        const auto& kb = std::get<KeyboardResult>(result.data);
+        config.serverUrl = kb.text;
+        TrmnlService::setConfig(config);
+        TrmnlService::saveConfig();
+      }
+    };
+
     startActivityForResult(std::make_unique<KeyboardEntryActivity>(renderer, mappedInput, tr(STR_TRMNL_SERVER_URL),
                                                                    config.serverUrl,
                                                                    100,      // maxLength
-                                                                   false),  // not password
-                           [this](const ActivityResult& result) {
-                             if (!result.isCancelled) {
-                               const auto& kb = std::get<KeyboardResult>(result.data);
-                                config.serverUrl = kb.text;
-                                TrmnlService::setConfig(config);
-                                TrmnlService::saveConfig();
-                             }
-                           });
+                                                                   InputType::Text),  // not password
+                           handler);
   } else if (selectedIndex == 3) {
     // Register device
     startActivityForResult(std::make_unique<TrmnlRegisterActivity>(renderer, mappedInput), [this](const ActivityResult&) {
